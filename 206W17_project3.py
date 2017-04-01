@@ -175,10 +175,6 @@ for avalue in mention_list:
 
 conn.commit()
 
-
-
-
-
 ## Task 3 - Making queries, saving data, fetching data
 
 # All of the following sub-tasks require writing SQL statements and executing them using Python.
@@ -201,7 +197,7 @@ for avalue in cur:
 
 # Make a query to select all of the tweets (full rows of tweet information) that have been retweeted more than 25 times. 
 # Save the result (a list of tuples, or an empty list) in a variable called more_than_25_rts.
-query = "SELECT * FROM Tweets WHERE retweets > 25";
+query = "SELECT * FROM Tweets WHERE retweets > 5";
 cur.execute(query)
 more_than_25_rts = []
 for avalue in cur:
@@ -209,16 +205,16 @@ for avalue in cur:
 
 # Make a query to select all the descriptions (descriptions only) of the users who have favorited more than 25 tweets. 
 # Access all those strings, and save them in a variable called descriptions_fav_users, which should ultimately be a list of strings.
-query = "SELECT description FROM Users WHERE (SELECT screen_name FROM Users WHERE num_favs > 25)";
+
+query = "SELECT description FROM Users WHERE num_favs > 5";
 cur.execute(query)
 descriptions_fav_users = []
-for avalue in query:
+for avalue in cur:
 	descriptions_fav_users.append(avalue[0])
 
 # Make a query using an INNER JOIN to get a list of tuples with 2 elements in each tuple: the user screenname and the text of the tweet -- 
 # for each tweet that has been retweeted more than 50 times. Save the resulting list of tuples in a variable called joined_result.
 
-# we want user screen_name and tweet text where tweet has been retweeted more than 50 times
 query = "SELECT Tweets.text, Users.screen_name FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id WHERE retweets > 50";
 cur.execute(query)
 joined_result = []
@@ -229,19 +225,39 @@ for avalue in cur:
 
 ## Use a set comprehension to get a set of all words (combinations of characters separated by whitespace) 
 # among the descriptions in the descriptions_fav_users list. Save the resulting set in a variable called description_words.
-print("HERE WE BEGIN PART 4 =-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-print(descriptions_fav_users)
 
+description_words = {aword for avalue in descriptions_fav_users for aword in avalue.split()}
 
-## Use a Counter in the collections library to find the most common character among all of the descriptions in the descriptions_fav_users list. Save that most common character in a variable called most_common_char. Break any tie alphabetically (but using a Counter will do a lot of work for you...).
+## Use a Counter in the collections library to find the most common character among all of the descriptions in the descriptions_fav_users list. 
+# Save that most common character in a variable called most_common_char. 
+# Break any tie alphabetically (but using a Counter will do a lot of work for you...).
 
+everything_in_a_string = ""
+for avalue in description_words:
+	for achar in avalue:
+		everything_in_a_string = everything_in_a_string + achar
 
+counter_value = collections.Counter(everything_in_a_string).most_common(1)
+most_common_char = counter_value[0][0]
 
 ## Putting it all together...
-# Write code to create a dictionary whose keys are Twitter screen names and whose associated values are lists of tweet texts that that user posted. You may need to make additional queries to your database! To do this, you can use, and must use at least one of: the DefaultDict container in the collections library, a dictionary comprehension, list comprehension(s). Y
+# Write code to create a dictionary whose keys are Twitter screen names and whose associated values are lists of tweet texts that that user posted. 
+# You may need to make additional queries to your database! To do this, you can use, and must use at least one of: 
+# the DefaultDict container in the collections library, a dictionary comprehension, list comprehension(s). Y
 # You should save the final dictionary in a variable called twitter_info_diction.
 
+joined_result_2 = []
+query = "SELECT Users.screen_name,Tweets.text FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id";
+cur.execute(query)
+for avalue in cur:
+	joined_result_2.append(avalue)
 
+twitter_info_diction = {}
+for avalue in joined_result_2: #individual tuples
+	if avalue[0] not in twitter_info_diction:
+		twitter_info_diction[avalue[0]] = []
+	twitter_info_diction[avalue[0]] = twitter_info_diction[avalue[0]] + [avalue[1]]
+print(twitter_info_diction)
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END OF THE FILE HERE SO YOU DO NOT LOCK YOUR DATABASE (it's fixable, but it's a pain). ###
 conn.close()
