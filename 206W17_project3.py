@@ -77,7 +77,6 @@ def get_user_tweets(twitter_handle):
 # Write an invocation to the function for the "umich" user timeline and save the result in a variable called umich_tweets:
 umich_tweets = get_user_tweets("umich")
 
-
 ## Task 2 - Creating database and loading data into database
 
 # You will be creating a database file: project3_tweets.db
@@ -85,17 +84,20 @@ umich_tweets = get_user_tweets("umich")
 # The database file should have 2 tables, and each should have the following columns... 
 
 # table Tweets, with columns:
-# - tweet_id (containing the string id belonging to the Tweet itself, from the data you got from Twitter -- note the id_str attribute) -- this column should be the PRIMARY KEY of this table
+# - tweet_id (containing the string id belonging to the Tweet itself, from the data you got from Twitter -- note the id_str attribute) -- 
+# this column should be the PRIMARY KEY of this table
 # - text (containing the text of the Tweet)
 # - user_id (an ID string, referencing the Users table, see below)
 # - time_posted (the time at which the tweet was created)
 # - retweets (containing the integer representing the number of times the tweet has been retweeted)
 
 # table Users, with columns:
-# - user_id (containing the string id belonging to the user, from twitter data -- note the id_str attribute) -- this column should be the PRIMARY KEY of this table
+# - user_id (containing the string id belonging to the user, from twitter data -- note the id_str attribute) -- 
+# this column should be the PRIMARY KEY of this table
 # - screen_name (containing the screen name of the user on Twitter)
 # - num_favs (containing the number of tweets that user has favorited)
-# - description (text containing the description of that user on Twitter, e.g. "Lecturer IV at UMSI focusing on programming" or "I tweet about a lot of things" or "Software engineer, librarian, lover of dogs..." -- whatever it is. OK if an empty string)
+# - description (text containing the description of that user on Twitter, e.g. "Lecturer IV at UMSI focusing on programming" or 
+# "I tweet about a lot of things" or "Software engineer, librarian, lover of dogs..." -- whatever it is. OK if an empty string)
 
 ## You should load into the Users table:
 # The umich user, and all of the data about users that are mentioned in the umich timeline. 
@@ -110,6 +112,75 @@ umich_tweets = get_user_tweets("umich")
 ## HINT #3: The users mentioned in each tweet are included in the tweet dictionary -- you don't need to do any manipulation of the Tweet text to find out which they are! Do some nested data investigation on a dictionary that represents 1 tweet to see it!
 
 
+conn = sqlite3.connect('project3_tweets.db')
+cur = conn.cursor()
+
+statement = ('DROP TABLE IF EXISTS Tweets')
+cur.execute(statement)
+statement = ('DROP TABLE IF EXISTS Users')
+cur.execute(statement)
+
+# Table for Tweets
+table_spec = 'CREATE TABLE IF NOT EXISTS '
+table_spec += 'Tweets (tweet_id TEXT PRIMARY KEY, '
+table_spec += 'text TEXT, user_id TEXT, time_posted TIMESTAMP, retweets INTEGER)'
+cur.execute(table_spec)
+
+# Table for Users
+table_spec = 'CREATE TABLE IF NOT EXISTS '
+table_spec += 'Users (user_id TEXT PRIMARY KEY, '
+table_spec += 'screen_name TEXT, num_favs INTEGER, description TEXT)'
+cur.execute(table_spec)
+
+# Put info in the Tweets table
+tweet_list = []
+for i in range(len(umich_tweets)):
+	tweet_id = umich_tweets[i]["id"]
+	text = umich_tweets[i]["text"]
+	user_id = umich_tweets[i]["user"]["id_str"]
+	time_posted = umich_tweets[i]["created_at"]
+	retweets = umich_tweets[i]["retweet_count"]
+	tweet_list.append((tweet_id, text, user_id, time_posted, retweets))
+
+statement = 'INSERT INTO Tweets VALUES (?, ?, ?, ?, ?)'
+for avalue in tweet_list:
+	cur.execute(statement,avalue)
+
+#Put info into Users table
+statement = 'INSERT OR IGNORE INTO Users Values (?, ?, ?, ?)'
+for avalue in umich_tweets:
+	user_id = avalue["user"]["id_str"]
+	screen_name = avalue["user"]["screen_name"]
+	num_favs = avalue["user"]["favourites_count"]
+	description = avalue["user"]["description"]
+	cur.execute(statement, (user_id, screen_name, num_favs, description))
+
+#Now if someone was mentioned in the UM list, add them to the Users table after this line!!!!!
+mention_list = []
+for tweet in umich_tweets:
+	whereweare = tweet["entities"]["user_mentions"]
+	for avalue in range(len(whereweare)):
+		mention_list.append(whereweare[avalue]["screen_name"])
+
+#so now add all of our mentions into our cache file
+for avalue in mention_list:
+	statement = 'INSERT OR IGNORE INTO Users Values (?, ?, ?, ?)'
+	mention_value = get_user_tweets(avalue)
+	for avalue in mention_value:
+		user_id = avalue["user"]["id_str"]
+		screen_name = avalue["user"]["screen_name"]
+		num_favs = avalue["user"]["favourites_count"]
+		description = avalue["user"]["description"]
+		cur.execute(statement, (user_id, screen_name, num_favs, description))
+
+
+conn.commit()
+
+
+# entities
+# user_mentions
+# i
+# screen_name
 
 
 
@@ -158,7 +229,7 @@ umich_tweets = get_user_tweets("umich")
 
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END OF THE FILE HERE SO YOU DO NOT LOCK YOUR DATABASE (it's fixable, but it's a pain). ###
-
+conn.close()
 
 ###### TESTS APPEAR BELOW THIS LINE ######
 ###### Note that the tests are necessary to pass, but not sufficient -- must make sure you've followed the instructions accurately! ######
