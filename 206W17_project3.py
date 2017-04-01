@@ -186,7 +186,9 @@ conn.commit()
 # Make a query to select all of the records in the Users database. Save the list of tuples in a variable called users_info.
 query = "SELECT * FROM Users";
 cur.execute(query)
-users_info = query
+users_info = []
+for avalue in cur:
+	users_info.append(avalue)
 
 # Make a query to select all of the user screen names from the database. 
 # Save a resulting list of strings (NOT tuples, the strings inside them!) 
@@ -199,11 +201,11 @@ for avalue in cur:
 
 # Make a query to select all of the tweets (full rows of tweet information) that have been retweeted more than 25 times. 
 # Save the result (a list of tuples, or an empty list) in a variable called more_than_25_rts.
-more_than_25_rts = "SELECT * FROM Tweets WHERE retweets > 25";
-cur.execute(more_than_25_rts)
-# more_than_25_rts = []
-# for avalue in cur:
-# 	more_than_25_rts.append(avalue)
+query = "SELECT * FROM Tweets WHERE retweets > 25";
+cur.execute(query)
+more_than_25_rts = []
+for avalue in cur:
+	more_than_25_rts.append(avalue)
 
 # Make a query to select all the descriptions (descriptions only) of the users who have favorited more than 25 tweets. 
 # Access all those strings, and save them in a variable called descriptions_fav_users, which should ultimately be a list of strings.
@@ -213,18 +215,22 @@ descriptions_fav_users = []
 for avalue in query:
 	descriptions_fav_users.append(avalue[0])
 
-
 # Make a query using an INNER JOIN to get a list of tuples with 2 elements in each tuple: the user screenname and the text of the tweet -- 
 # for each tweet that has been retweeted more than 50 times. Save the resulting list of tuples in a variable called joined_result.
 
 # we want user screen_name and tweet text where tweet has been retweeted more than 50 times
-joined_result = "SELECT Tweets.text, Users.screen_name FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id WHERE retweets > 5";
-cur.execute(joined_result)
+query = "SELECT Tweets.text, Users.screen_name FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id WHERE retweets > 50";
+cur.execute(query)
+joined_result = []
+for avalue in cur:
+	joined_result.append(avalue)
 
 ## Task 4 - Manipulating data with comprehensions & libraries
 
-## Use a set comprehension to get a set of all words (combinations of characters separated by whitespace) among the descriptions in the descriptions_fav_users list. Save the resulting set in a variable called description_words.
-
+## Use a set comprehension to get a set of all words (combinations of characters separated by whitespace) 
+# among the descriptions in the descriptions_fav_users list. Save the resulting set in a variable called description_words.
+print("HERE WE BEGIN PART 4 =-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+print(descriptions_fav_users)
 
 
 ## Use a Counter in the collections library to find the most common character among all of the descriptions in the descriptions_fav_users list. Save that most common character in a variable called most_common_char. Break any tie alphabetically (but using a Counter will do a lot of work for you...).
