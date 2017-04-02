@@ -215,7 +215,7 @@ for avalue in cur:
 # Make a query using an INNER JOIN to get a list of tuples with 2 elements in each tuple: the user screenname and the text of the tweet -- 
 # for each tweet that has been retweeted more than 50 times. Save the resulting list of tuples in a variable called joined_result.
 
-query = "SELECT Tweets.text, Users.screen_name FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id WHERE retweets > 50";
+query = "SELECT Tweets.text, Users.screen_name FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id WHERE retweets > 5";
 cur.execute(query)
 joined_result = []
 for avalue in cur:
@@ -246,21 +246,20 @@ most_common_char = counter_value[0][0]
 # the DefaultDict container in the collections library, a dictionary comprehension, list comprehension(s). Y
 # You should save the final dictionary in a variable called twitter_info_diction.
 
-joined_result_2 = []
 query = "SELECT Users.screen_name,Tweets.text FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id";
 cur.execute(query)
-for avalue in cur:
-	joined_result_2.append(avalue)
+joined_result_2 = [avalue for avalue in cur]
 
 twitter_info_diction = {}
-for avalue in joined_result_2: #individual tuples
+for avalue in joined_result_2:
 	if avalue[0] not in twitter_info_diction:
 		twitter_info_diction[avalue[0]] = []
 	twitter_info_diction[avalue[0]] = twitter_info_diction[avalue[0]] + [avalue[1]]
-print(twitter_info_diction)
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END OF THE FILE HERE SO YOU DO NOT LOCK YOUR DATABASE (it's fixable, but it's a pain). ###
 conn.close()
+
+
 
 ###### TESTS APPEAR BELOW THIS LINE ######
 ###### Note that the tests are necessary to pass, but not sufficient -- must make sure you've followed the instructions accurately! ######
