@@ -182,35 +182,28 @@ conn.commit()
 # Make a query to select all of the records in the Users database. Save the list of tuples in a variable called users_info.
 query = "SELECT * FROM Users";
 cur.execute(query)
-users_info = []
-for avalue in cur:
-	users_info.append(avalue)
+users_info = [avalue for avalue in cur]
 
 # Make a query to select all of the user screen names from the database. 
 # Save a resulting list of strings (NOT tuples, the strings inside them!) 
 # in the variable screen_names. HINT: a list comprehension will make this easier to complete!
 query = "SELECT screen_name FROM Users";
 cur.execute(query)
-screen_names = []
-for avalue in cur:
-	screen_names.append(avalue[0])
+screen_names = [avalue[0] for avalue in cur]
+
 
 # Make a query to select all of the tweets (full rows of tweet information) that have been retweeted more than 25 times. 
 # Save the result (a list of tuples, or an empty list) in a variable called more_than_25_rts.
 query = "SELECT * FROM Tweets WHERE retweets > 5";
 cur.execute(query)
-more_than_25_rts = []
-for avalue in cur:
-	more_than_25_rts.append(avalue)
+more_than_25_rts = [avalue for avalue in cur]
 
 # Make a query to select all the descriptions (descriptions only) of the users who have favorited more than 25 tweets. 
 # Access all those strings, and save them in a variable called descriptions_fav_users, which should ultimately be a list of strings.
 
 query = "SELECT description FROM Users WHERE num_favs > 5";
 cur.execute(query)
-descriptions_fav_users = []
-for avalue in cur:
-	descriptions_fav_users.append(avalue[0])
+descriptions_fav_users = [avalue[0] for avalue in cur]
 
 # Make a query using an INNER JOIN to get a list of tuples with 2 elements in each tuple: the user screenname and the text of the tweet -- 
 # for each tweet that has been retweeted more than 50 times. Save the resulting list of tuples in a variable called joined_result.
